@@ -49,17 +49,16 @@ def sheet_builder():
 
 def worker(path):
 
+   #Getting the index and path concatenated and split them to obtain path alone
    cnt = ''.join(path)
    token = cnt.split()
    path = token[1]
-
-   print(token[0])
 
    record = token[0], path, md5(path)
    write_to_csv("result.csv", record)
 
 
-#worker(path)
+##Build the worksheet to be used
 worksheet = sheet_builder()
 
 if __name__ == '__main__':
