@@ -1,10 +1,17 @@
 # !/usr/bin/python3
 import os, sys, csv, hashlib
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from hashlib import md5
 
 BLOCKSIZE = 65536
 n_jobs = 3
+path = ""
+worksheet = []
+file_count = 0
+
+if len(sys.argv) != 2:
+    print("Usage: You should provide one argument, path to be scanned")
+    exit(1)
 
 if  os.path.isdir(sys.argv[1]):
     path = sys.argv[1]
@@ -24,27 +31,38 @@ def md5(filename):
    return hasher.hexdigest()
 
 def write_to_csv(filename, data):
-   with open(filename, 'w') as csvFile:
+   with open(filename, 'a') as csvFile:
       writer = csv.writer(csvFile)
-      writer.writerows(data)
+      writer.writerow(data)
 
    csvFile.close()
 
-
-def exec(path):
-   csv_data = []
-
-   for root, dirs, files in os.walk(path, topdown = True):
+def sheet_builder():
+    for root, dirs, files in os.walk(path, topdown = True):
       for idx, name in enumerate(files):
-         record = idx, os.path.join(root, name), md5(os.path.join(root, name))
-         csv_data.append(record)
+          record = str(idx), " "+os.path.join(root, name)
+          worksheet.append(record)
 
-   write_to_csv("result.csv", csv_data)
-   #print(csv_data)
+    return  worksheet
 
 
-#exec(path)
+
+def worker(path):
+
+   cnt = ''.join(path)
+   token = cnt.split()
+   path = token[1]
+
+   print(token[0])
+
+   record = token[0], path, md5(path)
+   write_to_csv("result.csv", record)
+
+
+#worker(path)
+worksheet = sheet_builder()
 
 if __name__ == '__main__':
-    with Pool(n_jobs) as p:
-        print(p.map(exec, [path]))
+    n_proc = cpu_count()
+    with Pool(n_proc) as p:
+        print(p.map(worker, worksheet))
