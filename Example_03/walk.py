@@ -40,21 +40,20 @@ def write_to_csv(filename, data):
 def sheet_builder():
     for root, dirs, files in os.walk(path, topdown = True):
       for idx, name in enumerate(files):
-          record = str(idx), " "+os.path.join(root, name)
+          record = (idx, os.path.join(root, name))
           worksheet.append(record)
 
     return  worksheet
 
-
-
-def worker(path):
+def worker(job):
 
    #Getting the index and path concatenated and split them to obtain path alone
-   cnt = ''.join(path)
-   token = cnt.split()
-   path = token[1]
+   # cnt = ''.join(job)
+   # token = cnt.split()
+   idx, path = job
+   #job = token[1]
 
-   record = token[0], path, md5(path)
+   record = idx, path, md5(path)
    write_to_csv("result.csv", record)
 
 
